@@ -8,7 +8,7 @@ import {
 
 import "leaflet/dist/leaflet.css";
 
-import { sampleLocations } from "../../data/sampleLocations";
+import { sampleReports } from "../../data/sampleReports";
 import { sampleTrack } from "../../data/sampleTrack";
 
 export default function MapView() {
@@ -26,19 +26,19 @@ export default function MapView() {
         url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
 
-      {sampleLocations.map((location) => (
+      {sampleReports.map((report) => (
         <Marker
-          key={location.id}
+          key={report.id}
           position={[
-            location.latitude,
-            location.longitude,
+            report.latitude,
+            report.longitude,
           ]}
         >
           <Popup>
-            <strong>{location.name}</strong>
-            <p>{location.description}</p>
+            <strong>{report.title}</strong>
+            <p>{report.description}</p>
             <small>
-              {location.latitude}, {location.longitude}
+              {report.latitude}, {report.longitude}
             </small>
           </Popup>
         </Marker>
