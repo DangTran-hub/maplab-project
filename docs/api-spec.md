@@ -6,7 +6,7 @@ This document defines the initial JSON REST contract for field reports. All path
 
 ## Report resource
 
-The existing sample model is in `src/data/sampleReports.js`. Its fields and observed types are:
+The existing sample model is in `web/src/data/sampleReports.js`. Its fields and observed types are:
 
 | Field | Type | Create requirement | Notes |
 | --- | --- | --- | --- |

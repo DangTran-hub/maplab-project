@@ -12,6 +12,17 @@ dist
 dist-ssr
 *.local
 
+# Private configuration and local backend data
+.env
+.env.*
+!.env.example
+backend/storage/*
+!backend/storage/.gitkeep
+*.sqlite
+*.sqlite-*
+*.db
+*.db-*
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
