@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import AppHeader from "../components/layout/AppHeader";
+import Icon from "../components/Icon";
 import MapView from "../components/map/MapView";
 import { categoryLabels, nextStatuses, statusLabels } from "../data/reportOptions";
 import { listReports, updateReportStatus } from "../services/reports";
@@ -7,6 +8,7 @@ import { listReports, updateReportStatus } from "../services/reports";
 export default function MapPage() {
   const [reports, setReports] = useState([]);
   const [filter, setFilter] = useState("");
+  const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loaded, setLoaded] = useState(false);
@@ -45,7 +47,7 @@ export default function MapPage() {
     return () => { controller.abort(); requestId.current += 1; };
   }, []);
 
-  const visibleReports = useMemo(() => reports.filter((report) => !filter || report.status === filter), [reports, filter]);
+  const visibleReports = useMemo(() => reports.filter((report) => (!filter || report.status === filter) && `${report.title} ${report.description} ${categoryLabels[report.category]}`.toLocaleLowerCase("vi").includes(query.trim().toLocaleLowerCase("vi"))), [reports, filter, query]);
   const selected = visibleReports.find((report) => report.id === selectedId);
   const nextStatus = selected && nextStatuses[selected.status];
 
@@ -79,45 +81,51 @@ export default function MapPage() {
       <AppHeader />
       <main className="map-page">
         <section className="map-intro">
+          <div>
           <h2>Sự cố trong khuôn viên</h2>
-          <p>Chọn báo cáo trên bản đồ hoặc danh sách để xem và cập nhật tiến độ xử lý.</p>
+          <p>Tìm đúng vị trí. Theo dõi từng sự cố.</p>
+          </div>
+          <button className="refresh-button" type="button" onClick={refresh} disabled={loading || saving}>
+            <Icon name="refresh" size={17} />{loading ? "Đang tải…" : "Làm mới"}
+          </button>
         </section>
 
         <div className="report-toolbar">
-          <div className="report-filter">
-            <label htmlFor="status-filter">Trạng thái</label>
-            <select id="status-filter" value={filter} disabled={saving} onChange={(event) => setFilter(event.target.value)}>
-              <option value="">Tất cả</option>
-              {Object.entries(statusLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-            </select>
+          <div className="report-filter" role="group" aria-label="Lọc theo trạng thái">
+            {[["", "Tất cả"], ...Object.entries(statusLabels)].map(([value, label]) => (
+              <button key={value} type="button" aria-pressed={filter === value} disabled={saving} onClick={() => setFilter(value)}>
+                {value && <span className={`status-dot status-pin-${value.toLowerCase()}`} />}{label}<span className="filter-count">{reports.filter((report) => !value || report.status === value).length}</span>
+              </button>
+            ))}
           </div>
-          <button type="button" onClick={refresh} disabled={loading || saving}>
-            {loading ? "Đang tải…" : "Làm mới"}
-          </button>
-          <span aria-live="polite">{loaded ? `${visibleReports.length} / ${reports.length} báo cáo` : "Chưa tải dữ liệu"}</span>
+          <span className="toolbar-hint">Chọn ghim để xem chi tiết</span>
         </div>
 
         {error && <p className="message message-error" role="alert">{error}{loaded && " Dữ liệu đang hiển thị là lần tải gần nhất."}</p>}
         {notice && <p className="message message-success" role="status">{notice}</p>}
         {loading && <p role="status">Đang tải báo cáo…</p>}
-        {loaded && !loading && !error && visibleReports.length === 0 && (
+        {loaded && !loading && !error && !query && visibleReports.length === 0 && (
           <p className="message" role="status">{reports.length ? "Không có báo cáo thuộc trạng thái này. Hãy chọn trạng thái khác." : "Chưa có báo cáo. Báo cáo mới sẽ xuất hiện sau khi làm mới."}</p>
         )}
 
         <div className="report-workspace" aria-busy={loading}>
           <section className="map-panel" aria-label="Bản đồ báo cáo">
+            <div className="map-heading"><span><Icon name="layers" size={17} /> Bản đồ khuôn viên</span><span>Đường phố & địa điểm</span></div>
             <MapView reports={visibleReports} selectedId={selected?.id} onSelect={setSelectedId} />
+            <div className="map-legend" aria-label="Chú giải trạng thái">{Object.entries(statusLabels).map(([value, label]) => <span key={value}><i className={`status-dot status-pin-${value.toLowerCase()}`} />{label}</span>)}</div>
           </section>
           <aside className="report-sidebar" aria-label="Danh sách và chi tiết báo cáo">
             <section className="report-list-panel">
-              <h3>Danh sách báo cáo</h3>
+              <div className="list-heading"><h3>Báo cáo</h3><span aria-live="polite">{loaded ? `${visibleReports.length} kết quả` : "Đang kết nối"}</span></div>
+              <label className="search-box"><Icon name="search" size={18} /><span className="sr-only">Tìm báo cáo</span><input type="search" placeholder="Tìm tên, nội dung sự cố…" value={query} onChange={(event) => setQuery(event.target.value)} /></label>
+              {loaded && visibleReports.length === 0 && <p className="list-empty">{query ? "Không tìm thấy báo cáo. Thử từ khóa khác hoặc đổi bộ lọc." : "Chưa có báo cáo trong mục này."}</p>}
               <ul className="report-list">
                 {visibleReports.map((report) => (
                   <li key={report.id}>
                     <button type="button" className={selected?.id === report.id ? "report-item is-selected" : "report-item"}
                       aria-pressed={selected?.id === report.id} onClick={() => setSelectedId(report.id)}>
+                      <span className="report-category">{categoryLabels[report.category]}<Icon name="arrow" size={16} /></span>
                       <strong>{report.title}</strong>
-                      <span>{categoryLabels[report.category]}</span>
                       <span className={`status-badge status-${report.status.toLowerCase()}`}>{statusLabels[report.status]}</span>
                     </button>
                   </li>
@@ -125,7 +133,7 @@ export default function MapPage() {
               </ul>
             </section>
             <section className="report-detail" aria-label="Chi tiết báo cáo">
-              <h3>Chi tiết báo cáo</h3>
+              <div className="list-heading"><h3>Chi tiết báo cáo</h3>{selected && <button className="close-detail" type="button" aria-label="Đóng chi tiết" onClick={() => setSelectedId(null)}><Icon name="close" size={17} /></button>}</div>
               {selected ? (
                 <>
                   <h4>{selected.title}</h4>
@@ -143,7 +151,7 @@ export default function MapPage() {
                     </button>
                   ) : <p className="resolved-note">Báo cáo đã được xử lý.</p>}
                 </>
-              ) : <p>Chọn một báo cáo để xem chi tiết.</p>}
+              ) : <div className="detail-empty"><Icon name="pin" size={30} /><p>Chọn một vị trí để bắt đầu</p><span>Nhấn vào ghim trên bản đồ hoặc một báo cáo trong danh sách.</span></div>}
             </section>
           </aside>
         </div>

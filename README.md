@@ -36,7 +36,26 @@ npm run dev
 Open http://localhost:5173. Vite proxies /api to http://127.0.0.1:3001.
 Seed is optional, repeatable and never resets existing statuses. No automatic
 migration/seed runs on startup. The web has no sample-data fallback when API fails.
-OpenStreetMap tiles require internet; report lists still work if tiles are unavailable.
+The simplified street map uses OpenFreeMap vector tiles through a MapLibre layer
+inside Leaflet. It retains street names, landmark names and flat building
+footprints while removing minor points of interest, decorative patterns and 3D
+buildings. Vietnamese map names are preferred when available. No map API key is
+required. See the [OpenFreeMap guide](https://openfreemap.org/quick_start/).
+The cleaned style is bundled in `web/src/data/streetMapStyle.json`; every polygon
+has an explicit light color, including pedestrian areas. The app does not fetch
+or modify a live remote style. Run `npm --prefix web run test:map-style` to check
+the map color and geometry safeguards.
+Named libraries, schools, departments, offices and dormitories are shown from
+zoom 15, regardless of their source rank. More nearby destinations appear from
+zoom 17, and building/address numbers from zoom 18. Labels prefer Vietnamese,
+avoid overlap and use the map provider's actual names; unnamed buildings are
+not assigned invented names.
+Map assets require internet and the vector renderer requires WebGL. If the style
+or renderer fails, the map falls back to standard OpenStreetMap tiles with a
+visible notice. Report lists still work if map assets are unavailable.
+
+The manager supports report search, status filters, keyboard-accessible map pins
+and a “Xem toàn bộ” control to fit all visible reports.
 
 ## Configuration and LAN
 
