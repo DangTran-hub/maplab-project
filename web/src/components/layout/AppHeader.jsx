@@ -3,12 +3,9 @@ export default function AppHeader() {
     <header className="app-header">
       <div>
         <h1>MapLab</h1>
-        <p>Geographic Data Explorer</p>
+        <p>Quản lý sự cố trong khuôn viên</p>
       </div>
-
-      <span className="data-badge">
-        Sample data
-      </span>
+      <span className="data-badge">Bản đồ báo cáo</span>
     </header>
   );
 }

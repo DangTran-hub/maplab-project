@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-This repository contains a working React web prototype and scaffolds for a React Native mobile app and Node.js backend with SQLite. The map still renders sample reports and a sample track; mobile and backend are not runnable yet.
+This repository contains a React web manager and a runnable Node.js API with backend-only SQLite access (M0–M3). The map renders API reports; old fixtures remain for reference. The React Native mobile app is still a scaffold. See README.md for explicit migration/seed/setup commands. Use Node.js 24 for the backend.
 
 - `web/src/main.jsx` mounts the application; `web/src/App.jsx` composes its page.
 - `web/src/pages/` contains pages; `web/src/components/` contains map and layout components.
@@ -30,7 +30,7 @@ Use PascalCase for components, such as `MapView.jsx`, camelCase for data exports
 
 ## Testing Guidelines
 
-No automated test framework, test script, or coverage threshold is configured. Before submitting changes, run `npm run lint` and `npm run build`. For map changes, manually check tiles, markers, popup content, the track polyline, zoom interactions, and narrow-screen layout. Tile loading requires network access. If adding automated tests, document the runner, naming convention, and command.
+Backend tests use Node's built-in node:test runner in backend/tests/*.test.js; run `npm test` from the root. Before submitting changes, run `npm run lint` and `npm run build`. For map changes, manually check tiles, markers, popup content, selection, filtering, zoom interactions, and narrow-screen layout. The old track polyline is intentionally excluded from the manager view. Tile loading requires network access. No coverage threshold is configured.
 
 ## Commit & Pull Request Guidelines
 

@@ -7,6 +7,11 @@
     "dev": "npm --prefix web run dev",
     "build": "npm --prefix web run build",
     "lint": "npm --prefix web run lint",
-    "preview": "npm --prefix web run preview"
+    "preview": "npm --prefix web run preview",
+    "setup:backend": "npm --prefix backend ci",
+    "api": "npm --prefix backend start",
+    "db:migrate": "npm --prefix backend run migrate",
+    "db:seed": "npm --prefix backend run seed",
+    "test": "npm --prefix backend test"
   }
 }
